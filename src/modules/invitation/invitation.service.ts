@@ -32,6 +32,7 @@ export class InvitationService {
       name,
       type: dto.type,
       imageUrl,
+      active: dto.active ?? true,
     });
   }
 
@@ -64,6 +65,10 @@ export class InvitationService {
 
     if (dto.type) {
       invitation.type = dto.type;
+    }
+
+    if (dto.active !== undefined) {
+      invitation.active = dto.active;
     }
 
     return this.invitationRepository.save(invitation);

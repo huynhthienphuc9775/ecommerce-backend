@@ -24,6 +24,9 @@ export class Invitation {
   @Column()
   imageUrl: string;
 
+  @Column({ default: true })
+  active: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 }
