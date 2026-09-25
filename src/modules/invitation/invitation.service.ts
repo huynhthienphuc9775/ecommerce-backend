@@ -6,8 +6,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invitation } from './invitation.entity';
-import { CreateInvitationDto, UpdateInvitationDto } from './invitation.dto';
+import {
+  CreateInvitationDto,
+  QueryInvitationDto,
+  UpdateInvitationDto,
+} from './invitation.dto';
 import { S3Service } from '../upload/s3.service';
+
+export interface PaginatedInvitations {
+  data: Invitation[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 @Injectable()
 export class InvitationService {
@@ -26,18 +38,38 @@ export class InvitationService {
     }
 
     const imageUrl = await this.s3Service.uploadFile(image, 'invitations');
-    const name = await this.generateName();
 
-    return this.invitationRepository.save({
-      name,
+    const invitation = await this.invitationRepository.save({
+      name: '',
       type: dto.type,
       imageUrl,
       active: dto.active ?? true,
     });
+
+    invitation.name = `Thiệp mời ${String(invitation.id).padStart(2, '0')}`;
+    return this.invitationRepository.save(invitation);
   }
 
-  findAll(): Promise<Invitation[]> {
-    return this.invitationRepository.find();
+  async findAll(query: QueryInvitationDto): Promise<PaginatedInvitations> {
+    const { type, active, page, limit } = query;
+
+    const [data, total] = await this.invitationRepository.findAndCount({
+      where: {
+        ...(type && { type }),
+        ...(active !== undefined && { active }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number): Promise<Invitation> {
@@ -78,10 +110,5 @@ export class InvitationService {
     const invitation = await this.findOne(id);
     await this.s3Service.deleteFile(invitation.imageUrl);
     await this.invitationRepository.delete(id);
-  }
-
-  private async generateName(): Promise<string> {
-    const count = await this.invitationRepository.count();
-    return `Thiệp mời ${String(count + 1).padStart(2, '0')}`;
   }
 }

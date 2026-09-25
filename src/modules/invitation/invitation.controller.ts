@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -13,8 +14,12 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InvitationService } from './invitation.service';
-import { CreateInvitationDto, UpdateInvitationDto } from './invitation.dto';
+import { InvitationService, PaginatedInvitations } from './invitation.service';
+import {
+  CreateInvitationDto,
+  QueryInvitationDto,
+  UpdateInvitationDto,
+} from './invitation.dto';
 import { Invitation } from './invitation.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -35,8 +40,11 @@ export class InvitationController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  getAllInvitations(): Promise<Invitation[]> {
-    return this.invitationService.findAll();
+  @UsePipes(new ValidationPipe({ transform: true }))
+  getAllInvitations(
+    @Query() query: QueryInvitationDto,
+  ): Promise<PaginatedInvitations> {
+    return this.invitationService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard)

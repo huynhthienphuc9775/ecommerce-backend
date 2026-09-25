@@ -1,5 +1,5 @@
-import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsBoolean, IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { InvitationType } from './invitation.entity';
 
 const toBoolean = ({ value }: { value: unknown }): unknown => {
@@ -27,4 +27,27 @@ export class UpdateInvitationDto {
   @Transform(toBoolean)
   @IsBoolean()
   active?: boolean;
+}
+
+export class QueryInvitationDto {
+  @IsOptional()
+  @IsEnum(InvitationType)
+  type?: InvitationType;
+
+  @IsOptional()
+  @Transform(toBoolean)
+  @IsBoolean()
+  active?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit: number = 10;
 }
