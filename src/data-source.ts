@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import { User } from './modules/user/user.entity';
 import { Invitation } from './modules/invitation/invitation.entity';
 import { Product } from './modules/product/product.entity';
@@ -12,9 +12,7 @@ export const dataSourceOptions: DataSourceOptions = {
   password: process.env.DB_PASSWORD ?? 'dev123',
   database: process.env.DB_DATABASE ?? 'my_database',
   entities: [User, Invitation, Product],
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
-  synchronize: false,
+  // TypeORM tự tạo/sửa bảng cho khớp entity mỗi lần app khởi động.
+  // Lưu ý: đổi tên cột sẽ bị hiểu là xóa cột cũ + thêm cột mới, dữ liệu cột đó mất.
+  synchronize: true,
 };
-
-// Used by the TypeORM CLI (migration:generate / migration:run).
-export default new DataSource(dataSourceOptions);

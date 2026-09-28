@@ -14,10 +14,7 @@ import { dataSourceOptions } from './data-source';
     AuthModule,
     InvitationModule,
     ProductModule,
-    TypeOrmModule.forRoot({
-      ...dataSourceOptions,
-      migrationsRun: true,
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
   ],
   controllers: [AppController],
   providers: [AppService],
