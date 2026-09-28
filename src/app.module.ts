@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { InvitationModule } from './modules/invitation/invitation.module';
+import { ProductModule } from './modules/product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './data-source';
 
@@ -12,6 +13,7 @@ import { dataSourceOptions } from './data-source';
     UserModule,
     AuthModule,
     InvitationModule,
+    ProductModule,
     TypeOrmModule.forRoot({
       ...dataSourceOptions,
       migrationsRun: true,

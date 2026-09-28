@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { User } from './modules/user/user.entity';
 import { Invitation } from './modules/invitation/invitation.entity';
+import { Product } from './modules/product/product.entity';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'mysql',
@@ -10,7 +11,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_USERNAME ?? 'dev',
   password: process.env.DB_PASSWORD ?? 'dev123',
   database: process.env.DB_DATABASE ?? 'my_database',
-  entities: [User, Invitation],
+  entities: [User, Invitation, Product],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 };
