@@ -1,4 +1,3 @@
-import { Type } from './../../../node_modules/mysql2/typings/mysql/lib/parsers/typeCast.d';
 import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
