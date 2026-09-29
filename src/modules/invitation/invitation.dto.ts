@@ -10,10 +10,6 @@ const toBoolean = ({ value }: { value: unknown }): unknown => {
 export class CreateInvitationDto {
   @Type(() => Number)
   @IsInt()
-  typeId: number;
-
-  @Type(() => Number)
-  @IsInt()
   eventId: number;
 
   @IsOptional()
@@ -23,11 +19,6 @@ export class CreateInvitationDto {
 }
 
 export class UpdateInvitationDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  typeId?: number;
-
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -43,12 +34,13 @@ export class QueryInvitationDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  typeId?: number;
+  eventId?: number;
 
+  // Lọc theo category của event, không lưu categoryId trên invitation.
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  eventId?: number;
+  categoryId?: number;
 
   @IsOptional()
   @Transform(toBoolean)

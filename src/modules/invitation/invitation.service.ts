@@ -11,7 +11,6 @@ import {
   QueryInvitationDto,
   UpdateInvitationDto,
 } from './invitation.dto';
-import { Type } from '../type/type.entity';
 import { Event } from '../event/event.entity';
 import { S3Service } from '../upload/s3.service';
 
@@ -28,19 +27,10 @@ export class InvitationService {
   constructor(
     @InjectRepository(Invitation)
     private readonly invitationRepository: Repository<Invitation>,
-    @InjectRepository(Type)
-    private readonly typeRepository: Repository<Type>,
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
     private readonly s3Service: S3Service,
   ) {}
-
-  private async ensureTypeExists(typeId: number): Promise<void> {
-    const exists = await this.typeRepository.existsBy({ id: typeId });
-    if (!exists) {
-      throw new BadRequestException(`Type with id ${typeId} not found`);
-    }
-  }
 
   private async ensureEventExists(eventId: number): Promise<void> {
     const exists = await this.eventRepository.existsBy({ id: eventId });
@@ -57,14 +47,12 @@ export class InvitationService {
       throw new BadRequestException('Image is required');
     }
 
-    await this.ensureTypeExists(dto.typeId);
     await this.ensureEventExists(dto.eventId);
 
     const imageUrl = await this.s3Service.uploadFile(image, 'invitations');
 
     const invitation = await this.invitationRepository.save({
       name: '',
-      typeId: dto.typeId,
       eventId: dto.eventId,
       imageUrl,
       active: dto.active ?? true,
@@ -78,12 +66,13 @@ export class InvitationService {
   }
 
   async findAll(query: QueryInvitationDto): Promise<PaginatedInvitations> {
-    const { typeId, eventId, active, page, limit } = query;
+    const { eventId, categoryId, active, page, limit } = query;
 
     const [data, total] = await this.invitationRepository.findAndCount({
       where: {
-        ...(typeId && { typeId }),
         ...(eventId && { eventId }),
+        // Category không lưu trên invitation mà suy ra qua event.
+        ...(categoryId && { event: { categoryId } }),
         ...(active !== undefined && { active }),
       },
       skip: (page - 1) * limit,
@@ -116,13 +105,8 @@ export class InvitationService {
     const invitation = await this.findOne(id);
 
     // Cập nhật theo từng cột thay vì save() cả entity: entity load lên có sẵn
-    // quan hệ `type`/`event` (eager), khi save nó sẽ ghi đè lại khóa ngoại.
+    // quan hệ `event` (eager), khi save nó sẽ ghi đè lại `eventId`.
     const changes: Partial<Invitation> = {};
-
-    if (dto.typeId !== undefined) {
-      await this.ensureTypeExists(dto.typeId);
-      changes.typeId = dto.typeId;
-    }
 
     if (dto.eventId !== undefined) {
       await this.ensureEventExists(dto.eventId);

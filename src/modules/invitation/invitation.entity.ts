@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Type } from '../type/type.entity';
 import { Event } from '../event/event.entity';
 
 @Entity('invitations')
@@ -16,13 +15,6 @@ export class Invitation {
 
   @Column()
   name: string;
-
-  @Column()
-  typeId: number;
-
-  @ManyToOne(() => Type, { eager: true })
-  @JoinColumn({ name: 'typeId' })
-  type: Type;
 
   @Column()
   eventId: number;

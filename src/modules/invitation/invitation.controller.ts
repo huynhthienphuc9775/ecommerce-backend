@@ -48,6 +48,12 @@ export class InvitationController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  getInvitation(@Param('id') id: number): Promise<Invitation> {
+    return this.invitationService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @UseInterceptors(FileInterceptor('image'))
   @UsePipes(new ValidationPipe({ transform: true }))
