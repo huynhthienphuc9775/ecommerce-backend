@@ -4,10 +4,11 @@ import { InvitationController } from './invitation.controller';
 import { InvitationService } from './invitation.service';
 import { Invitation } from './invitation.entity';
 import { Type } from '../type/type.entity';
+import { Event } from '../event/event.entity';
 import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invitation, Type]), UploadModule],
+  imports: [TypeOrmModule.forFeature([Invitation, Type, Event]), UploadModule],
   controllers: [InvitationController],
   providers: [InvitationService],
 })

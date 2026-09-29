@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Type } from '../type/type.entity';
+import { Event } from '../event/event.entity';
 
 @Entity('invitations')
 export class Invitation {
@@ -22,6 +23,13 @@ export class Invitation {
   @ManyToOne(() => Type, { eager: true })
   @JoinColumn({ name: 'typeId' })
   type: Type;
+
+  @Column()
+  eventId: number;
+
+  @ManyToOne(() => Event, { eager: true })
+  @JoinColumn({ name: 'eventId' })
+  event: Event;
 
   @Column()
   imageUrl: string;

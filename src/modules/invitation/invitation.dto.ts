@@ -12,6 +12,10 @@ export class CreateInvitationDto {
   @IsInt()
   typeId: number;
 
+  @Type(() => Number)
+  @IsInt()
+  eventId: number;
+
   @IsOptional()
   @Transform(toBoolean)
   @IsBoolean()
@@ -25,6 +29,11 @@ export class UpdateInvitationDto {
   typeId?: number;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  eventId?: number;
+
+  @IsOptional()
   @Transform(toBoolean)
   @IsBoolean()
   active?: boolean;
@@ -35,6 +44,11 @@ export class QueryInvitationDto {
   @Type(() => Number)
   @IsInt()
   typeId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  eventId?: number;
 
   @IsOptional()
   @Transform(toBoolean)

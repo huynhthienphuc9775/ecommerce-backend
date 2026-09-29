@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import { Like, Repository } from 'typeorm';
 import { Event } from './event.entity';
 import { CreateEventDto, QueryEventDto, UpdateEventDto } from './event.dto';
 import { Category } from '../category/category.entity';
+import { Invitation } from '../invitation/invitation.entity';
 import { S3Service } from '../upload/s3.service';
 
 export interface PaginatedEvents {
@@ -25,6 +27,8 @@ export class EventService {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -120,6 +124,17 @@ export class EventService {
 
   async remove(id: number): Promise<void> {
     const event = await this.findOne(id);
+
+    const invitationsUsingEvent = await this.invitationRepository.countBy({
+      eventId: id,
+    });
+
+    if (invitationsUsingEvent > 0) {
+      throw new ConflictException(
+        `Cannot delete event "${event.name}": it is used by ${invitationsUsingEvent} invitation(s)`,
+      );
+    }
+
     await this.s3Service.deleteFile(event.imageUrl);
     await this.eventRepository.delete(id);
   }
