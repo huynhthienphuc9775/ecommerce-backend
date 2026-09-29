@@ -52,14 +52,10 @@ export class InvitationService {
     const imageUrl = await this.s3Service.uploadFile(image, 'invitations');
 
     const invitation = await this.invitationRepository.save({
-      name: '',
+      name: dto.name,
       eventId: dto.eventId,
       imageUrl,
       active: dto.active ?? true,
-    });
-
-    await this.invitationRepository.update(invitation.id, {
-      name: `Thiệp mời ${String(invitation.id).padStart(2, '0')}`,
     });
 
     return this.findOne(invitation.id);
@@ -107,6 +103,10 @@ export class InvitationService {
     // Cập nhật theo từng cột thay vì save() cả entity: entity load lên có sẵn
     // quan hệ `event` (eager), khi save nó sẽ ghi đè lại `eventId`.
     const changes: Partial<Invitation> = {};
+
+    if (dto.name !== undefined) {
+      changes.name = dto.name;
+    }
 
     if (dto.eventId !== undefined) {
       await this.ensureEventExists(dto.eventId);

@@ -1,4 +1,11 @@
-import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 const toBoolean = ({ value }: { value: unknown }): unknown => {
@@ -8,6 +15,10 @@ const toBoolean = ({ value }: { value: unknown }): unknown => {
 };
 
 export class CreateInvitationDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
   @Type(() => Number)
   @IsInt()
   eventId: number;
@@ -19,6 +30,11 @@ export class CreateInvitationDto {
 }
 
 export class UpdateInvitationDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  name?: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()
