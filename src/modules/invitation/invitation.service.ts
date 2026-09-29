@@ -11,6 +11,7 @@ import {
   QueryInvitationDto,
   UpdateInvitationDto,
 } from './invitation.dto';
+import { Type } from '../type/type.entity';
 import { S3Service } from '../upload/s3.service';
 
 export interface PaginatedInvitations {
@@ -26,8 +27,17 @@ export class InvitationService {
   constructor(
     @InjectRepository(Invitation)
     private readonly invitationRepository: Repository<Invitation>,
+    @InjectRepository(Type)
+    private readonly typeRepository: Repository<Type>,
     private readonly s3Service: S3Service,
   ) {}
+
+  private async ensureTypeExists(typeId: number): Promise<void> {
+    const exists = await this.typeRepository.existsBy({ id: typeId });
+    if (!exists) {
+      throw new BadRequestException(`Type with id ${typeId} not found`);
+    }
+  }
 
   async create(
     dto: CreateInvitationDto,
@@ -37,25 +47,30 @@ export class InvitationService {
       throw new BadRequestException('Image is required');
     }
 
+    await this.ensureTypeExists(dto.typeId);
+
     const imageUrl = await this.s3Service.uploadFile(image, 'invitations');
 
     const invitation = await this.invitationRepository.save({
       name: '',
-      type: dto.type,
+      typeId: dto.typeId,
       imageUrl,
       active: dto.active ?? true,
     });
 
-    invitation.name = `Thiệp mời ${String(invitation.id).padStart(2, '0')}`;
-    return this.invitationRepository.save(invitation);
+    await this.invitationRepository.update(invitation.id, {
+      name: `Thiệp mời ${String(invitation.id).padStart(2, '0')}`,
+    });
+
+    return this.findOne(invitation.id);
   }
 
   async findAll(query: QueryInvitationDto): Promise<PaginatedInvitations> {
-    const { type, active, page, limit } = query;
+    const { typeId, active, page, limit } = query;
 
     const [data, total] = await this.invitationRepository.findAndCount({
       where: {
-        ...(type && { type }),
+        ...(typeId && { typeId }),
         ...(active !== undefined && { active }),
       },
       skip: (page - 1) * limit,
@@ -87,23 +102,29 @@ export class InvitationService {
   ): Promise<Invitation> {
     const invitation = await this.findOne(id);
 
-    if (image) {
-      await this.s3Service.deleteFile(invitation.imageUrl);
-      invitation.imageUrl = await this.s3Service.uploadFile(
-        image,
-        'invitations',
-      );
-    }
+    // Cập nhật theo từng cột thay vì save() cả entity: entity load lên có sẵn
+    // quan hệ `type` (eager), khi save nó sẽ ghi đè lại `typeId`.
+    const changes: Partial<Invitation> = {};
 
-    if (dto.type) {
-      invitation.type = dto.type;
+    if (dto.typeId !== undefined) {
+      await this.ensureTypeExists(dto.typeId);
+      changes.typeId = dto.typeId;
     }
 
     if (dto.active !== undefined) {
-      invitation.active = dto.active;
+      changes.active = dto.active;
     }
 
-    return this.invitationRepository.save(invitation);
+    if (image) {
+      await this.s3Service.deleteFile(invitation.imageUrl);
+      changes.imageUrl = await this.s3Service.uploadFile(image, 'invitations');
+    }
+
+    if (Object.keys(changes).length > 0) {
+      await this.invitationRepository.update(id, changes);
+    }
+
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {

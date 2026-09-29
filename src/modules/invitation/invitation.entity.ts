@@ -3,12 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-
-export enum InvitationType {
-  WEDDING = 'wedding',
-  BIRTHDAY = 'birthday',
-}
+import { Type } from '../type/type.entity';
 
 @Entity('invitations')
 export class Invitation {
@@ -18,8 +16,12 @@ export class Invitation {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: InvitationType })
-  type: InvitationType;
+  @Column()
+  typeId: number;
+
+  @ManyToOne(() => Type, { eager: true })
+  @JoinColumn({ name: 'typeId' })
+  type: Type;
 
   @Column()
   imageUrl: string;

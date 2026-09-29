@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { InvitationModule } from './modules/invitation/invitation.module';
+import { TypeModule } from './modules/type/type.module';
 import { CategoryModule } from './modules/category/category.module';
 import { EventModule } from './modules/event/event.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,6 +15,7 @@ import { dataSourceOptions } from './data-source';
     UserModule,
     AuthModule,
     InvitationModule,
+    TypeModule,
     CategoryModule,
     EventModule,
     TypeOrmModule.forRoot(dataSourceOptions),

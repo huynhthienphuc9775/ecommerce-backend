@@ -1,6 +1,5 @@
-import { IsBoolean, IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { InvitationType } from './invitation.entity';
 
 const toBoolean = ({ value }: { value: unknown }): unknown => {
   if (value === 'true') return true;
@@ -9,8 +8,9 @@ const toBoolean = ({ value }: { value: unknown }): unknown => {
 };
 
 export class CreateInvitationDto {
-  @IsEnum(InvitationType)
-  type: InvitationType;
+  @Type(() => Number)
+  @IsInt()
+  typeId: number;
 
   @IsOptional()
   @Transform(toBoolean)
@@ -20,8 +20,9 @@ export class CreateInvitationDto {
 
 export class UpdateInvitationDto {
   @IsOptional()
-  @IsEnum(InvitationType)
-  type?: InvitationType;
+  @Type(() => Number)
+  @IsInt()
+  typeId?: number;
 
   @IsOptional()
   @Transform(toBoolean)
@@ -31,8 +32,9 @@ export class UpdateInvitationDto {
 
 export class QueryInvitationDto {
   @IsOptional()
-  @IsEnum(InvitationType)
-  type?: InvitationType;
+  @Type(() => Number)
+  @IsInt()
+  typeId?: number;
 
   @IsOptional()
   @Transform(toBoolean)
